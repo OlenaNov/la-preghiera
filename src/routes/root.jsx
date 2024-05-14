@@ -31,14 +31,14 @@ export default function Root() {
           </div>
           <nav>
           <List />
-            <ul>
+            {/* <ul>
               <li>
                 <Link to={`/la-preghiera/contacts/1`}>Your Name</Link>
               </li>
               <li>
                 <Link to={`/la-preghiera/contacts/2`}>Your Friend</Link>
               </li>
-            </ul>
+            </ul> */}
           </nav>
         </div>
         <div id="detail">
