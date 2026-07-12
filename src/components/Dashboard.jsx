@@ -24,16 +24,12 @@ const Dashboard = () => {
   const isFormValid = formData.nome.trim() !== '' && formData.dataNascita !== '';
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return unsubscribeAuth;
+    return onAuthStateChanged(auth, (currentUser) => setUser(currentUser));
   }, []);
 
   useEffect(() => {
     if (!user) return;
-    const userDocRef = doc(db, "utenti", user.uid);
-    const unsubscribeSnapshot = onSnapshot(userDocRef, (snap) => {
+    return onSnapshot(doc(db, "utenti", user.uid), (snap) => {
       if (snap.exists()) {
         const data = snap.data();
         setFormData({ nome: data.nome || '', dataNascita: data.dataNascita || '' });
@@ -41,7 +37,6 @@ const Dashboard = () => {
         if (data.lingua) setLang(data.lingua);
       }
     });
-    return unsubscribeSnapshot;
   }, [user, setLang]);
 
   const salvaUtente = async () => {
@@ -52,10 +47,9 @@ const Dashboard = () => {
 
     if (!querySnapshot.empty) {
       const docEsistente = querySnapshot.docs[0];
-      const datiTrovati = docEsistente.data();
-      await setDoc(doc(db, "utenti", user.uid), { ...datiTrovati, uid: user.uid }, { merge: true });
+      await setDoc(doc(db, "utenti", user.uid), { ...docEsistente.data(), uid: user.uid }, { merge: true });
     } else {
-      await setDoc(doc(db, "utenti", user.uid), { nome: formData.nome.toUpperCase(), dataNascita: formData.dataNascita, preferiti: [], lingua: lang }, { merge: true });
+      await setDoc(doc(db, "utenti", user.uid), { nome: formData.nome.toUpperCase(), dataNascita: formData.dataNascita, preferiti: preferitiIds, lingua: lang }, { merge: true });
     }
   };
 
@@ -63,11 +57,9 @@ const Dashboard = () => {
     e.stopPropagation();
     if (!user) return;
     const userRef = doc(db, "utenti", user.uid);
-    
     if (preferitiIds.includes(id)) {
       await updateDoc(userRef, { preferiti: arrayRemove(id) });
     } else {
-      // Uso merge: true per creare il doc se non esiste
       await setDoc(userRef, { preferiti: arrayUnion(id) }, { merge: true });
     }
   };
